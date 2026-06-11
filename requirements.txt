@@ -10,3 +10,7 @@
 # -e .
 
 dvc
+ipykernel
+matplotlib==3.10.9
+seaborn==0.13.2
+missingno==0.5.2
