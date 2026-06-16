@@ -1,0 +1,154 @@
+schema: '2.0'
+stages:
+  data_cleaning:
+    cmd: python -m src.data_cleaning
+    deps:
+    - path: data/raw/Music Info.csv
+      hash: md5
+      md5: e63b74919a3cdada5c804df4666391c9
+      size: 14985870
+    - path: src/data_cleaning.py
+      hash: md5
+      md5: 76cdbce90fa5d4ab2227330b4613eda5
+      size: 2203
+    outs:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: ad73ab9b7c97fed0f3cc26fc9b24f8c6
+      size: 13712182
+  transform_data:
+    cmd: python src/content_based_filtering.py
+    deps:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: ad73ab9b7c97fed0f3cc26fc9b24f8c6
+      size: 13712182
+    - path: src/content_based_filtering.py
+      hash: md5
+      md5: 590999faf8a5bf5bb6bacd21e2e53bc6
+      size: 6056
+    outs:
+    - path: models/transformed_data.npz
+      hash: md5
+      md5: 7f0f6c4dfaa26361495ebb258aa0235c
+      size: 4523498
+    - path: models/transformer.joblib
+      hash: md5
+      md5: 80cb670ce7522294bbe0324bb23a806f
+      size: 135325
+  interaction_data:
+    cmd: python src/collaborative_filtering.py
+    deps:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: ad73ab9b7c97fed0f3cc26fc9b24f8c6
+      size: 13712182
+    - path: data/raw/User Listening History.csv
+      hash: md5
+      md5: 3a12e713844195171c7040c051d6d4ae
+      size: 602515573
+    - path: src/collaborative_filtering.py
+      hash: md5
+      md5: b48cdcfe79857d22dd43cc1f0ffc8e6e
+      size: 4375
+    outs:
+    - path: data/processed/collab_filtered_data.csv
+      hash: md5
+      md5: f0f182d757a9837caa7ff619cab9ffd0
+      size: 8260460
+    - path: models/interaction_matrix.npz
+      hash: md5
+      md5: 53f8fa1e7cec19856a6b2bc60ce8881f
+      size: 32311353
+    - path: models/track_ids.npy
+      hash: md5
+      md5: 4a52e4cb6bae6b0126c1344dac7c7686
+      size: 640058
+  transformed_filtered_data:
+    cmd: python src/transform_filtered_data.py
+    deps:
+    - path: data/processed/collab_filtered_data.csv
+      hash: md5
+      md5: f0f182d757a9837caa7ff619cab9ffd0
+      size: 8260460
+    - path: src/transform_filtered_data.py
+      hash: md5
+      md5: 066bfbb3b004446ebf290e034ec52c8d
+      size: 1472
+    outs:
+    - path: models/transformed_hybrid_data.npz
+      hash: md5
+      md5: 8f37bd9aeb4ffaa293c0dc62d4364775
+      size: 2977364
+  content_based_filtering:
+    cmd: python -m src.content_based_filtering
+    deps:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: ad73ab9b7c97fed0f3cc26fc9b24f8c6
+      size: 13712182
+    - path: src/content_based_filtering.py
+      hash: md5
+      md5: 6018497b3ddbfdb4b88ab88869ce074b
+      size: 6271
+    - path: src/data_cleaning.py
+      hash: md5
+      md5: 76cdbce90fa5d4ab2227330b4613eda5
+      size: 2203
+    outs:
+    - path: models/transformed_data.npz
+      hash: md5
+      md5: 2d570319e7014b4a27e9e8c6b21bbe2e
+      size: 4523508
+    - path: models/transformer.joblib
+      hash: md5
+      md5: 9fb90f0c1b1670f81f16a4a24ddab042
+      size: 135949
+  collaborative_base_filtering:
+    cmd: python -m src.collaborative_base_filtering
+    deps:
+    - path: data/processed/cleaned_data.csv
+      hash: md5
+      md5: ad73ab9b7c97fed0f3cc26fc9b24f8c6
+      size: 13712182
+    - path: data/raw/User Listening History.csv
+      hash: md5
+      md5: 3a12e713844195171c7040c051d6d4ae
+      size: 602515573
+    - path: src/collaborative_base_filtering.py
+      hash: md5
+      md5: 39ac778dcbdb30e4f9f7569853b0fdc1
+      size: 4663
+    - path: src/data_cleaning.py
+      hash: md5
+      md5: 76cdbce90fa5d4ab2227330b4613eda5
+      size: 2203
+    outs:
+    - path: data/processed/collab_filtered_data.csv
+      hash: md5
+      md5: f0f182d757a9837caa7ff619cab9ffd0
+      size: 8260460
+    - path: models/interaction_matrix.npz
+      hash: md5
+      md5: 3dfe9b0c768b7e2a048818128e1a2e25
+      size: 32311353
+    - path: models/track_ids.npy
+      hash: md5
+      md5: 4a52e4cb6bae6b0126c1344dac7c7686
+      size: 640058
+  hybrid_base_filtering:
+    cmd: python -m src.hybrid_base_filtering
+    deps:
+    - path: data/processed/collab_filtered_data.csv
+      hash: md5
+      md5: f0f182d757a9837caa7ff619cab9ffd0
+      size: 8260460
+    - path: src/hybrid_base_filtering.py
+      hash: md5
+      md5: 399389dab9300a439c825be3ae3e9af8
+      size: 1657
+    outs:
+    - path: models/transformed_hybrid_data.npz
+      hash: md5
+      md5: eb26445e81672120489b3e7d82a0762a
+      size: 2977348

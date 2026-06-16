@@ -1,0 +1,63 @@
+from pathlib import Path
+import sys
+root_path = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(root_path))
+
+
+from src.content_based_filtering import content_recommendations
+from scipy.sparse import load_npz
+import streamlit as st
+import pandas as pd
+
+
+st.set_page_config(
+    page_title="Spotify Song Recommender 🚀",
+    page_icon="🎶",
+    layout="centered"
+)
+
+
+songs_data = pd.read_csv("A:/CODES/PROJECTS/hybrid-recommender-system/data/processed/cleaned_data.csv")
+transformed_data = load_npz("A:/CODES/PROJECTS/hybrid-recommender-system/models/transformed_data.npz")
+
+
+st.write('### Enter the name of a song and artist, the recommender will suggest similar songs 🎵🎧')
+
+
+song_name = st.text_input('Enter a song name: ', value='Love Story').lower()
+artist_name = st.text_input('Enter the artist name: ', value='Taylor Swift').lower()
+
+
+k = st.slider(label="How many recommendations do you want ?",
+                    min_value=1,
+                    max_value=20,
+                    value=5,
+                    step=1)
+
+
+if st.button('Get Recommendations'):
+    if ((songs_data["name"] == song_name) & (songs_data['artist'] == artist_name)).any():
+        st.write('Recommendations for', f"**{song_name}** by **{artist_name}**")
+        recommendations = content_recommendations(
+            song_name=song_name,
+            artist_name=artist_name,
+            songs_data=songs_data,
+            transformed_data=transformed_data,
+            k=k
+            )
+
+        for ind , recommendation in recommendations.iterrows():
+            song_name = recommendation['name'].title()
+            artist_name = recommendation['artist'].title()
+            
+            if ind == 0:
+                st.markdown("## Currently Playing")
+                st.markdown(f"#### **{song_name}** by **{artist_name}**")
+                st.audio(recommendation['spotify_preview_url'])
+                st.write('---')
+            else:
+                st.markdown(f"#### {ind}. **{song_name}** by **{artist_name}**")
+                st.audio(recommendation['spotify_preview_url'])
+                st.write('---')
+    else:
+        st.write(f"Sorry, we couldn't find {song_name} in our database. Please try another song.")
